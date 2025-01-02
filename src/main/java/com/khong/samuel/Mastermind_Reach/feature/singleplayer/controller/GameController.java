@@ -20,10 +20,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @GetMapping("/")
-    public String getText() {
-        return "Hello, World!";
-    }
+
 
     // create new game
     @GetMapping ("/start")
@@ -40,7 +37,6 @@ public class GameController {
     // Get the current game by ID
     @GetMapping("/game/{id}")
     public ResponseEntity<Game> getGame(@PathVariable("id") String gameId) {
-        System.out.println(gameId); // Log the gameId for debugging
         Game game = gameService.getGameById(gameId);
 
         if (game == null) {
@@ -49,6 +45,24 @@ public class GameController {
 
         return ResponseEntity.ok(game);
     }
+
+    @PostMapping("/game/{id}")
+    public ResponseEntity<Game> postGuess(@PathVariable("id") String gameId, @RequestBody String guess) {
+        // Retrieve the game by its ID
+        Game game = gameService.getGameById(gameId);
+
+        if (game == null) {
+            return ResponseEntity.notFound().build();  // Return 404 if game not found
+        }
+
+        // Handle updating processing the game guess
+        Game updatedGame = gameService.processGuess(game, guess);  // Process the guess and return updated game
+
+        // Return the updated game object
+        return ResponseEntity.ok(updatedGame);
+    }
+
+
 
 
 

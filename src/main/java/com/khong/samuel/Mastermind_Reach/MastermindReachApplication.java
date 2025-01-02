@@ -9,9 +9,6 @@ public class MastermindReachApplication {
 
 	public static void main(String[] args) {
 
-
-
-
 		SpringApplication.run(MastermindReachApplication.class, args);
 	}
 

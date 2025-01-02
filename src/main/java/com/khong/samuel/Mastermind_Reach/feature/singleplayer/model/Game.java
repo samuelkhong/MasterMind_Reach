@@ -18,7 +18,13 @@ public class Game {
     private String id; // Unique identifier for the game
     private String secretCode; // The secret code to be guessed
     private boolean gameOver; // Indicates if the game is finished
-    private boolean won; // Indicates if the player has won
+
+    private String[] board;
+    @Builder.Default
+    private boolean won = false; // Indicates if the player has won
+
+    // sets default to turn 1
+    @Builder.Default
     private int turn = 1; // represents the current turn
 
     @Builder.Default
@@ -28,7 +34,6 @@ public class Game {
     private List<String> feedbacks = new ArrayList<>(); // Feedback strings for guesses
 
 
-
     public void addGuess(String guess) {
         this.guesses.add(guess);
     }
@@ -36,4 +41,9 @@ public class Game {
     public void addFeedback(String feedback) {
         this.feedbacks.add(feedback);
     }
+
+    public void endGame() {
+        setWon(true);
+    }
+
 }
