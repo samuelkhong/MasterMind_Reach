@@ -1,8 +1,8 @@
-package feature.singleplayer.controller;
+package com.khong.samuel.Mastermind_Reach.feature.singleplayer.controller;
 
 
-import feature.singleplayer.model.Game;
-import feature.singleplayer.service.GameService;
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.service.GameService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,21 +20,27 @@ public class GameController {
         this.gameService = gameService;
     }
 
+    @GetMapping("/")
+    public String getText() {
+        return "Hello, World!";
+    }
+
     // create new game
-    @PostMapping("/start")
+    @GetMapping ("/start")
     public ResponseEntity<Void> startGame() {
         Game newGame = gameService.startNewGame();
 
         // Dynamically create new link using gameID
-        URI gameUri = URI.create("../games/" + newGame.getId());
+        URI gameUri = URI.create("./game/" + newGame.getId());
 
         // Return a 302 redirect with the Location header
         return ResponseEntity.status(302).location(gameUri).build();
     }
 
     // Get the current game by ID
-    @GetMapping("/game")
-    public ResponseEntity<Game> getGame(@RequestParam("id") String gameId) {
+    @GetMapping("/game/{id}")
+    public ResponseEntity<Game> getGame(@PathVariable("id") String gameId) {
+        System.out.println(gameId); // Log the gameId for debugging
         Game game = gameService.getGameById(gameId);
 
         if (game == null) {
@@ -43,6 +49,9 @@ public class GameController {
 
         return ResponseEntity.ok(game);
     }
+
+
+
 
 
 

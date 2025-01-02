@@ -1,4 +1,4 @@
-package feature.singleplayer.model;
+package com.khong.samuel.Mastermind_Reach.feature.singleplayer.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -19,6 +19,7 @@ public class Game {
     private String secretCode; // The secret code to be guessed
     private boolean gameOver; // Indicates if the game is finished
     private boolean won; // Indicates if the player has won
+    private int turn = 1; // represents the current turn
 
     @Builder.Default
     private List<String> guesses = new ArrayList<>(); // List of guesses as strings

@@ -1,7 +1,7 @@
-package feature.singleplayer.service;
+package com.khong.samuel.Mastermind_Reach.feature.singleplayer.service;
 
-import feature.singleplayer.model.Game;
-import feature.singleplayer.repository.GameRepository;
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +15,7 @@ public class GameService {
 
     public Game startNewGame() {
         Game newGame = Game.builder()
-                .secretCode(generateSecretCode()) // Generate secret code
+                .secretCode(generateSecretCode(4)) // Generate secret code
                 .gameOver(false)
                 .won(false)
                 .build();
@@ -30,9 +30,8 @@ public class GameService {
                 .orElseThrow(() -> new IllegalArgumentException("Game with ID " + gameId + " not found"));
     }
 
-    private String generateSecretCode() {
-        // Logic to generate a random secret code for Mastermind
-        return "1234"; // Example static code for simplicity
+    private String generateSecretCode(int codeLength) {
+        return "1234";
     }
 
 

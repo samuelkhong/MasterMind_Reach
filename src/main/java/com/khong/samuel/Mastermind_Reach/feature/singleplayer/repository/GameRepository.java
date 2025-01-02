@@ -1,6 +1,6 @@
-package feature.singleplayer.repository;
+package com.khong.samuel.Mastermind_Reach.feature.singleplayer.repository;
 
-import feature.singleplayer.model.Game;
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
