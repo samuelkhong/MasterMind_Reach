@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -17,14 +18,16 @@ public class Game {
     @Id
     private String id; // Unique identifier for the game
     private String secretCode; // The secret code to be guessed
-    private boolean gameOver; // Indicates if the game is finished
+
 
     private String[][] board;
 
-    // Difficulty Enum
     public enum Difficulty {
         EASY, MEDIUM, HARD
     }
+
+    @Builder.Default
+    private boolean gameOver = false; // Indicates if the game is finished
 
     @Builder.Default
     private Difficulty difficulty = Difficulty.EASY; // Default difficulty is easy
@@ -40,16 +43,19 @@ public class Game {
     private List<String> guesses = new ArrayList<>(); // List of guesses as strings
 
     @Builder.Default
-    private List<String> feedbacks = new ArrayList<>(); // Feedback strings for guesses
+    private String[] feedbacks = new String[10]; // Feedback strings for guesses
+
+    // Constructor fills feedback so not empty
+
 
 
     public void addGuess(String guess) {
         this.guesses.add(guess);
     }
-
-    public void addFeedback(String feedback) {
-        this.feedbacks.add(feedback);
+    public void addFeedback(String feedback, int turn) {
+        this.feedbacks[turn - 1] = feedback;
     }
+
 
     public void endGame() {
         setWon(true);

@@ -8,29 +8,36 @@
 </head>
 <body>
 
-
 <h1>Mastermind Game</h1>
 
-<!-- Only show secret key if game is over (won or lost) -->
-<div th:if="${game.status != 'ongoing'}">
-    <h2>You <span th:text="${game.status}"></span></h2>
-    <div>Secret: <span th:text="${game.secretCode}"></span></div>
+<!-- Display game over message and secret code if the game is over -->
+<div th:if="${game.gameOver}">
+    <h2 th:text="'You ' + (${game.won} ? 'won' : 'lost')"></h2>
+    <div>Secret Code: <span th:text="${game.secretCode}"></span></div>
 </div>
 
+<!-- Display the game board with guesses and feedback -->
 <table>
     <tr th:each="row, rowIndex : ${game.board}">
         <td th:each="cell : ${row}" th:text="${cell}"></td>
-        <td th:text="${game.feedback[rowIndex]}"></td>
     </tr>
 </table>
 
-<!-- Only show form if game is ongoing -->
-<div th:if="${game.status == 'ongoing'}">
-    <form id="guessForm" th:action="@{/game/guess}" method="post">
-        <div th:each="i : ${#numbers.sequence(1, game.difficulty == 'medium' ? 6 : (game.difficulty == 'hard' ? 8 : 4))}">
-            <label th:for="'guess' + ${i}">Guess <span th:text="${i}"></span>:</label>
-            <input type="number" th:name="'guess' + ${i}" th:id="'guess' + ${i}" min="0" max="7" required>
+<!-- Show current turn if the game is not over -->
+<div th:if="${not game.gameOver}">
+    <p>Turn: <span th:text="${game.turn}"></span></p>
+
+    <!-- Form to submit guess -->
+    <form id="guessForm" th:action="@{/singleplayer/guess}" method="post">
+        <!-- Remove the static gameId hidden input here -->
+
+        <!-- Generate input fields based on game difficulty -->
+        <div th:each="i : ${#numbers.sequence(1, game.difficulty == 'MEDIUM' ? 6 : game.difficulty == 'HARD' ? 8 : 4)}">
+            <label th:for="'guess' + ${i}">Guess <span th:text="${i}">1</span>:</label>
+            <input type="number" th:name="'guess' + ${i}" th:id="'guess' + ${i}" min="0" max="7" required/>
         </div>
+
+
         <button type="submit">Submit Guess</button>
     </form>
 </div>
@@ -38,16 +45,22 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.getElementById("guessForm");
-        const gameIdInput = document.createElement("input");
-        gameIdInput.type = "hidden";
-        gameIdInput.name = "gameId";
 
-        // Get gameId from URL
-        const gameId = window.location.pathname.split("/").pop(); // Get the last segment of the URL path
+        // Check if gameId already exists in the form
+        let gameIdInput = document.querySelector("input[name='gameId']");
+        if (!gameIdInput) {
+            gameIdInput = document.createElement("input");
+            gameIdInput.type = "hidden";
+            gameIdInput.name = "gameId";
 
-        gameIdInput.value = gameId; // Set the value of the hidden input to the extracted game ID
-        form.appendChild(gameIdInput);
+            // Get gameId from URL
+            const gameId = window.location.pathname.split("/").pop(); // Get the last segment of the URL path
+
+            gameIdInput.value = gameId; // Set the value of the hidden input to the extracted game ID
+            form.appendChild(gameIdInput); // Append it to the form
+        }
     });
 </script>
+
 </body>
 </html>

@@ -1,5 +1,6 @@
 package com.khong.samuel.Mastermind_Reach.feature.singleplayer.service;
 
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Feedback;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.repository.GameRepository;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -141,18 +144,84 @@ import static org.mockito.Mockito.*;
         @Test
         void testProcessGuess() {
             // Arrange
-            Game game = Game.builder().turn(1).difficulty(Game.Difficulty.EASY).build();
-            String guess = "1234"; // Mock guess
+            Game game = gameService.startNewGame("EASY");
+            List<Integer> guess = Arrays.asList(1, 2, 3, 4); // Mock guess as a List of integers
             when(gameRepository.save(any(Game.class))).thenReturn(game);
 
+            // Assuming gameService is properly mocked and injected
+            GameService gameService = mock(GameService.class);  // Add this if you haven't already mocked gameService
+
             // Act
-            Game updatedGame = gameService.processGuess(game, guess);
+            Game updatedGame = gameService.processGuess(game.getId(), guess);
 
             // Assert
-            assertNotNull(updatedGame);
-            assertEquals(2, updatedGame.getTurn()); // Turn should be incremented
-            verify(gameRepository, times(1)).save(any(Game.class)); // Ensure save is called
+            assertNotNull(updatedGame); // Ensure updatedGame is not null
+            assertEquals(2, updatedGame.getTurn()); // Verify turn is incremented
+            verify(gameRepository, times(1)).save(any(Game.class)); // Ensure save is called once
+            verify(gameService, times(1)).processGuess(game.getId(), guess); // Ensure processGuess is called once
         }
+
+    /**
+     *
+     * This test verifies the behavior of the getFeedback() method by ensuring that it correctly calculates
+     * the number of exact and partial matches between the guess and the secret code.
+     * In this case, the guess matches the secret code exactly.
+     */
+    @Test
+    void testGetFeedback() {
+        // Arrange
+        Game game = gameService.startNewGame("EASY");  // Use the startNewGame method for consistent setup
+        game.setSecretCode("1234");  // Setting a mock secret code
+        int[] guess = {1, 2, 3, 4};  // Exact match guess
+        Feedback feedback = new Feedback();  // Feedback object to store results
+
+
+        gameService.getFeedback(guess, game.getSecretCode().chars().map(Character::getNumericValue).toArray(), feedback);  // Calculate feedback
+
+        // Assert
+        assertEquals(4, feedback.getExactMatches());  // Verify 4 exact matches
+        assertEquals(0, feedback.getPartialMatches());  // Verify 0 partial matches
+    }
+
+    @Test
+    void testAllIncorrectGuesses() {
+        // Arrange
+        Game game = gameService.startNewGame("EASY");  // Use the startNewGame method for consistent setup
+        game.setSecretCode("5678");  // Setting a mock secret code
+        int[] guess = {1, 2, 3, 4};  // Exact match guess
+        Feedback feedback = new Feedback();  // Feedback object to store results
+
+
+        gameService.getFeedback(guess, game.getSecretCode().chars().map(Character::getNumericValue).toArray(), feedback);  // Calculate feedback
+
+        // Assert
+        assertEquals(0, feedback.getExactMatches());  // Verify 4 exact matches
+        assertEquals(0, feedback.getPartialMatches());  // Verify 0 partial matches
+    }
+
+    @Test
+    void partialCorrectGuesses() {
+        // Arrange
+        Game game = gameService.startNewGame("EASY");  // Use the startNewGame method for consistent setup
+        game.setSecretCode("1234");  // Setting a mock secret code
+        int[] guess = {1, 2, 5, 1};  // Exact match guess
+        Feedback feedback = new Feedback();  // Feedback object to store results
+
+
+        gameService.getFeedback(guess, game.getSecretCode().chars().map(Character::getNumericValue).toArray(), feedback);  // Calculate feedback
+
+        // Assert
+        assertEquals(2, feedback.getExactMatches());  // 2 exact matches: 1 and 2
+        assertEquals(0, feedback.getPartialMatches());  // 1 partial match: the second 1 (index 3) is a partial match
+
+    }
+
+
+
+
+
+//
+
 
 
 

@@ -6,6 +6,7 @@ import com.khong.samuel.Mastermind_Reach.feature.singleplayer.repository.GameRep
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -22,12 +23,15 @@ public class GameService {
         this.gameRepository = gameRepository;
     }
 
+    @Transactional
     public Game startNewGame(String difficulty) {
         // Set the difficulty
         Game.Difficulty gameDifficulty = Game.Difficulty.valueOf(difficulty.toUpperCase());
 
         // Initialize the board based on difficulty
         String[][] board = intializeBoard(difficulty);
+
+        String[] feedback = intializeFeedback();
 
         // Create a new game instance with the provided difficulty and board
         Game newGame = Game.builder()
@@ -37,7 +41,9 @@ public class GameService {
                 .gameOver(false) // Game is not over initially
                 .won(false) // Player has not won yet
                 .turn(1) // Start from turn 1
+                .feedbacks(feedback)
                 .build();
+
 
         gameRepository.save(newGame);
 
@@ -53,7 +59,8 @@ public class GameService {
     }
 
     // update player input into the board
-    public Game processGuess(Game game, String guess) {
+    public Game processGuess(String gameID, List<Integer> guess) {
+        Game game = getGameById(gameID);
         try {
             // Early exit if game already won or game over
             if (game.isGameOver()) {
@@ -68,11 +75,6 @@ public class GameService {
                 return game;
             }
 
-            // Convert the guess into a list of integers
-            List<Integer> guessValues = guess.chars()
-                    .map(c -> Character.getNumericValue(c))
-                    .boxed()
-                    .collect(Collectors.toList());
 
             // Validate the guess if it is integers
             if (!isValidNumber(guess)) {
@@ -80,14 +82,19 @@ public class GameService {
                 return game;  // Or return some error response in a different context
             }
 
+            // Convert guess list into int[]
+            int[] guessArr = guess.stream()
+                    .mapToInt(Integer::intValue)  // Convert Integer to int
+                    .toArray();
+
             // Add feedback to the game state
-            addFeedback(guess, game);
+            addFeedback(guessArr, game);
 
             // Update the board with the guess
-            updateBoard( guess, game);
+            updateBoard(guessArr, game);
 
             // Check if the guess resulted in a win
-            if (checkWin(guess, game)) {
+            if (checkWin(guessArr, game)) {
                 game.setWon(true);  // Set won to true
                 game.setGameOver(true);  // Set game over
             } else {
@@ -100,7 +107,6 @@ public class GameService {
 
             return game;
         } catch (Exception e) {
-            // Handle exceptions (e.g., logging or rethrowing as a runtime exception)
             e.printStackTrace();
             return game; // Or return an error response if needed
         }
@@ -108,23 +114,27 @@ public class GameService {
 
 
 
-    private void addFeedback(String guess, Game game) {
-        // Convert the guess string into an array of characters
-        char[] guessArr = guess.toCharArray();
-        // Convert the secret code from the game into an array of characters
-        char[] secretCodeArr = game.getSecretCode().toCharArray();
+
+
+
+    private void addFeedback(int[] guess, Game game) {
+        // Convert the secret code from the game into an int array
+        int[] secretCodeArr = new int[game.getSecretCode().length()];
+        for (int i = 0; i < game.getSecretCode().length(); i++) {
+            secretCodeArr[i] = Character.getNumericValue(game.getSecretCode().charAt(i));
+        }
 
         // Create a Feedback object to store the result
         Feedback feedback = new Feedback();
 
         // Calculate feedback based on the guess and the secret code
-        getFeedback(guessArr, secretCodeArr, feedback);
+        getFeedback(guess, secretCodeArr, feedback);
 
         // Convert the feedback object into a string and store it in the game
-        game.addFeedback(feedbackToString(feedback));
+        game.addFeedback(feedbackToString(feedback), game.getTurn());
     }
 
-    private void getFeedback(char[] guessArr, char[] secretCodeArr, Feedback feedback) {
+    public void getFeedback(int[] guessArr, int[] secretCodeArr, Feedback feedback) {
         int correctNumLoc = 0;
         int correctNumOnly = 0;
 
@@ -140,14 +150,13 @@ public class GameService {
                 secretIndexMatch.add(i);
             }
         }
-
-        // Next, find partial matches (correct number but wrong location)
+        //  find partial matches (correct number but wrong location)
         for (int i = 0; i < guessArr.length; i++) {
             if (guessIndexMatch.contains(i)) {
-                continue;  // Skip if this index is already an exact match
+                continue;  // Skip if found match already avoid doub;le count
             }
 
-            // Look for the first occurrence of the number in the secret code that's not already matched
+            // find  first occurrence of the number in the secret code not already matched
             for (int j = 0; j < secretCodeArr.length; j++) {
                 if (guessArr[i] == secretCodeArr[j] && !secretIndexMatch.contains(j)) {
                     correctNumOnly++;
@@ -162,6 +171,7 @@ public class GameService {
         feedback.setPartialMatches(correctNumOnly);
     }
 
+
     private String feedbackToString(Feedback feedback) {
         // Convert the feedback object into a string format
         return "Exact Matches: " + feedback.getExactMatches() + ", Partial Matches: " + feedback.getPartialMatches();
@@ -169,11 +179,18 @@ public class GameService {
 
 
 
-    private boolean checkWin(String guess, Game game) {
+    private boolean checkWin(int[] guessArr, Game game) {
+        // Convert secretCode (which is currently a string) to an int array
         String secret = game.getSecretCode();
+        int[] secretArr = new int[secret.length()];
 
-        // If guess matches the secret, game is won
-        if (guess.equals(secret)) {
+        // Convert the secret code string to an int array for comparison
+        for (int i = 0; i < secret.length(); i++) {
+            secretArr[i] = Character.getNumericValue(secret.charAt(i));
+        }
+
+        // If the guessArr matches the secretArr, game is won
+        if (Arrays.equals(guessArr, secretArr)) {
             // Set game state to 'won'
             game.setWon(true);
             game.setGameOver(true); // Mark game as complete
@@ -184,48 +201,57 @@ public class GameService {
         return false;
     }
 
-    private void updateBoard(String guess, Game game) {
+
+    private void updateBoard(int[] guess, Game game) {
         String[][] board = game.getBoard();
         int turn = game.getTurn();
 
-        // Convert guess into a string array for each character (or split it as needed)
-        String[] guessArr = guess.split("");  // Split the guess into individual characters
+        // Convert int[] guess into a String array for each character (or split it as needed)
+        String[] guessArr = new String[guess.length];
+        for (int i = 0; i < guess.length; i++) {
+            guessArr[i] = String.valueOf(guess[i]);  // Convert each int to String
+        }
 
         // Add guess to the board at the appropriate turn position
-        if (turn < 10) {  // Make sure the turn is within the maximum number of turns. Prevent adding to null index
-            board[10 - turn ] = guessArr;  //
+        if (turn < 10) {  // Ensure the turn is within the valid number of turns
+            board[10 - turn] = guessArr;
         }
 
         // Update the game board in the game object
         game.setBoard(board);
 
-        // Save the updated game state
+        // Save the updated game state (assuming gameRepository.save() is present)
         gameRepository.save(game);
     }
 
 
-    private boolean isValidNumber(String input) {
-        // Check if the input is a valid number based on the allowed range and length
-        for (int i = 0; i < input.length(); i++) {
-            char ch = input.charAt(i);
-            // Return false if a non-digit character is found
-            if (!Character.isDigit(ch)) {
-                return false;
-            }
 
-            // Ensure the digit is within the valid range (0-6 based on earlier context)
-            int digit = Character.getNumericValue(ch);
-            if (digit < 0 || digit >= 7) { // Assuming valid digits are 0-6 for the guess
+    private boolean isValidNumber(List<Integer> guesses) {
+        // Ensure the list of guesses is not empty
+        if (guesses == null || guesses.isEmpty()) {
+            return false;
+        }
+
+        // Iterate through each guess in the list and validate
+        for (Integer guess : guesses) {
+            // Ensure the guess is within the valid range (0-6)
+            if (guess < 0 || guess >= 7) {
                 return false;
             }
         }
 
-        return true;
+        return true; // All guesses are valid
     }
 
+
+    private String[] intializeFeedback() {
+        String[] feedbacks = new String[10];
+        Arrays.fill(feedbacks, ""); // Fill the array with empty strings
+        return feedbacks;
+    }
+
+
     private String[][] intializeBoard(String gameDifficulty) {
-
-
         int colSize = 4;
 
         switch (gameDifficulty.toLowerCase()) {
@@ -245,7 +271,7 @@ public class GameService {
         // Intialize  board size based on difficulty of game
         String[][] board = new String[10][colSize];
 
-        // Iterate through each col on the board
+        // Iterate through each col on the board and fill with #
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < colSize; j++) {
                 board[i][j] = "#";

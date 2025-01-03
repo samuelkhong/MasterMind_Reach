@@ -9,6 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -32,49 +36,93 @@ public class GameController {
 
     @PostMapping("/start")
     public String startNewGame(@RequestParam String difficulty, Model model) {
-        // Create a new game object based on the selected difficulty
-        Game newGame = gameService.startNewGame(difficulty);
+        try {
+            // Create a new game based on the selected difficulty
+            Game newGame = gameService.startNewGame(difficulty);
 
-        // Add the new game to the model so it can be accessed in the Thymeleaf template
-//        model.addAttribute("newGame", newGame);
+            // Add the new game to the model (if you need to use it for something else)
+            model.addAttribute("game", newGame);
 
-        // Return the name of the Thymeleaf template
-        return "hello world";
+            // Redirect to the game page using the game ID
+            return "redirect:/singleplayer/game/" + newGame.getId();  // Redirects to the /game/{gameId} URL
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error";  // Return an error page if something goes wrong
+        }
     }
 
+    @GetMapping("/game/{gameId}")
+    public String loadGame(@PathVariable String gameId, Model model) {
+        // For debugging: check the gameId being passed
+//        System.out.println("Game ID from URL: " + gameId);
 
-
-    // Get the current game by ID
-    @GetMapping("/game/{id}")
-    public ResponseEntity<Game> getGame(@PathVariable("id") String gameId) {
+        // Retrieve the game object by its ID
         Game game = gameService.getGameById(gameId);
 
         if (game == null) {
-            return ResponseEntity.notFound().build();
+            return "error";  // Return error if no game is found
         }
 
-        return ResponseEntity.ok(game);
+        // Add the game object to the model for the Thymeleaf template
+        model.addAttribute("game", game);
+
+        // Return the game template
+        return "singleplayer/game";  // This is the Thymeleaf template to display the game
     }
 
-    @PostMapping("/game/{id}")
-    public ResponseEntity<Game> postGuess(@PathVariable("id") String gameId, @RequestBody String guess) {
-        // Retrieve the game by its ID
+    @PostMapping("/guess")
+    public String handleGuess(@RequestParam("gameId") String gameId,
+                              @RequestParam Map<String, String> allParams,
+                              Model model) {
+        // test if we got gameID
+        System.out.println(gameId);
+        // print out guesses
+        System.out.println(allParams);
+        // Get the game object based on gameId
         Game game = gameService.getGameById(gameId);
 
-        if (game == null) {
-            return ResponseEntity.notFound().build();  // Return 404 if game not found
+        // Initialize the maxGuesses variable based on game difficulty
+        int maxGuesses = 0;
+
+        // Switch statement to set the number of guesses based on difficulty
+        switch (game.getDifficulty()) {
+            case EASY:
+                maxGuesses = 4;  // 4 guesses for EASY
+                break;
+            case MEDIUM:
+                maxGuesses = 6;  // 6 guesses for MEDIUM
+                break;
+            case HARD:
+                maxGuesses = 8;  // 8 guesses for HARD
+                break;
+            default:
+                maxGuesses = 4;  // Default to 4 guesses if difficulty is unknown
+                break;
         }
 
-        // Handle updating processing the game guess
-        Game updatedGame = gameService.processGuess(game, guess);  // Process the guess and return updated game
+        // List to store the guesses in order
+        List<Integer> guesses = new ArrayList<>();
 
-        // Return the updated game object
-        return ResponseEntity.ok(updatedGame);
+        // Loop through each guess (from 1 to maxGuesses) and retrieve the corresponding value
+        for (int i = 1; i <= maxGuesses; i++) {
+            String guessStr = allParams.get("guess" + i); // Get the value for guess1.
+
+            if (guessStr != null && !guessStr.isEmpty()) {
+                int guess = Integer.parseInt(guessStr);
+                guesses.add(guess);  // The list will maintain the order of guesses
+            }
+        }
+
+        System.out.println(guesses);
+
+        // Send guesses to be processed
+        gameService.processGuess(gameId, guesses);
+
+        // Add the game data to the model for rendering the view
+        model.addAttribute("game", game);
+
+        return "redirect:/singleplayer/game/" + gameId;  // Redirects to the /game/{gameId} URL
     }
-
-
-
-
 
 
 
