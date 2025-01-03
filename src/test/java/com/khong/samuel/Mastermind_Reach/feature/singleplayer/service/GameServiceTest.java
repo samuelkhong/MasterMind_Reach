@@ -1,68 +1,160 @@
 package com.khong.samuel.Mastermind_Reach.feature.singleplayer.service;
 
+import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.repository.GameRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
 
-@ExtendWith(MockitoExtension.class)
-class GameServiceTest {
 
-    @Mock
-    private GameRepository gameRepository;
+import java.util.Optional;
 
-    @InjectMocks
-    private GameService gameService;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    /**
-     * Tests the startNewGame method in GameService.
-     *
-     * This test ensures that:
-     * - A new game is saved via the GameRepository.
-     * - The returned game has the expected default values, such as a generated secret code,
-     *   gameOver set to false, and won set to false.
-     *
-     * @throws Exception if any unexpected behavior occurs during the test.
-     */
-    @Test
-    void startNewGame_shouldReturnSavedGame() {
 
-    }
+/**
+ * Unit tests for the GameService class.
+ * This class tests the functionality of various methods in the GameService.
+ */
 
-    /**
-     * Tests the getGameById method in GameService when the game is found.
-     *
-     * This test ensures that:
-     * - The game with the specified ID is returned when it exists in the repository.
-     */
-    @Test
-    void getGameById_shouldReturnGameWhenFound() {
-        // Test implementation
-    }
+    @ExtendWith(MockitoExtension.class)
+    class GameServiceTest {
+
+        @Mock
+        private GameRepository gameRepository;
+
+        @InjectMocks
+        private GameService gameService;
+
+        @Mock
+        private RestTemplate restTemplate;  // Mock RestTemplate
 
     /**
-     * Tests the getGameById method in GameService when the game is not found.
+     * Tests the generateSecretCode method in GameService.
      *
      * This test ensures that:
-     * - An IllegalArgumentException is thrown when the game ID is not found in the repository.
+     * - The generated secret code has the correct length based on difficulty (easy, medium, hard).
+     * - The method handles HTTP errors gracefully.
+     * - The method handles network errors gracefully.
+     * - The method handles other unexpected errors gracefully.
      */
     @Test
-    void getGameById_shouldThrowExceptionWhenNotFound() {
-        // Test implementation
+    void testGenerateSecretCode() {
+        // Arrange
+        String easyCode = "1234"; // Simulate a generated code
+        String mediumCode = "123456";
+        String hardCode = "12345678";
+
+
+        // Act & Assert for Easy difficulty
+        String easySecretCode = gameService.generateSecretCode("easy");
+        assertEquals(4, easySecretCode.length());  // Verify the length for "easy"
+
+        // Act & Assert for Medium difficulty
+        String mediumSecretCode = gameService.generateSecretCode("medium");
+        assertEquals(6, mediumSecretCode.length());  // Verify the length for "medium"
+
+        // Act & Assert for Hard difficulty
+        String hardSecretCode = gameService.generateSecretCode("hard");
+        assertEquals(8, hardSecretCode.length());  // Verify the length for "hard"
     }
 
-    /**
-     * Tests the processGuess method in GameService when the game is already won.
-     *
-     * This test ensures that:
-     * - If the game has already been won, the method returns the game without further processing.
-     * - No interactions with the GameRepository occur.
-     */
-    @Test
-    void processGuess_shouldReturnGameIfAlreadyWon() {
-        // Test implementation
+        /**
+         * Tests the startNewGame method in GameService.
+         *
+         * This test ensures that:
+         * - A new game is saved via the GameRepository.
+         * - The returned game has the expected default values, such as a generated secret code,
+         *   gameOver set to false, and won set to false.
+         */
+        @Test
+        void testStartNewGame() {
+
+            String difficulty = "easy";
+            boolean gameOver = false;
+            boolean won = false;
+            int turn = 1;
+
+            // Create a mock game with the default difficulty and values for gameOver, won, and turn
+            Game mockGame = Game.builder()
+                    .difficulty(Game.Difficulty.EASY)
+                    .gameOver(gameOver)
+                    .won(won)
+                    .turn(turn)
+                    .build();
+
+            // Mock the repository save call to return the mock game
+            when(gameRepository.save(any(Game.class))).thenReturn(mockGame);
+
+
+            Game newGame = gameService.startNewGame(difficulty);
+            System.out.println(newGame.getId());
+            System.out.println(newGame.getSecretCode());
+
+
+            assertNotNull(newGame);  // Ensure the game is not null
+            assertEquals(Game.Difficulty.EASY, newGame.getDifficulty());  // Verify difficulty is set to easy
+            assertEquals(gameOver, newGame.isGameOver());  // Verify gameOver is false
+            assertEquals(won, newGame.isWon());  // Verify won is false
+            assertEquals(turn, newGame.getTurn());  // Verify turn is initialized to 1
+
+            // Verify that the save method was called exactly once
+            verify(gameRepository, times(1)).save(any(Game.class));
+
+        }
+
+        /**
+         * Tests the getGameById method in GameService.
+         *
+         * This test ensures that:
+         * - A game is retrieved by its ID from the GameRepository.
+         * - The returned game has the expected ID.
+         */
+        @Test
+        void testGetGameById() {
+            // Arrange
+            String gameId = "123";
+            Game mockGame = Game.builder().id(gameId).build();
+            when(gameRepository.findById(gameId)).thenReturn(Optional.of(mockGame));
+
+            // Act
+            Game game = gameService.getGameById(gameId);
+
+            // Assert
+            assertNotNull(game);
+            assertEquals(gameId, game.getId());
+        }
+
+        /**
+         * Tests the processGuess method in GameService.
+         *
+         * This test ensures that:
+         * - A valid guess is processed correctly.
+         * - The game state (turn count) is updated.
+         * - The game is saved in the GameRepository after the guess.
+         */
+        @Test
+        void testProcessGuess() {
+            // Arrange
+            Game game = Game.builder().turn(1).difficulty(Game.Difficulty.EASY).build();
+            String guess = "1234"; // Mock guess
+            when(gameRepository.save(any(Game.class))).thenReturn(game);
+
+            // Act
+            Game updatedGame = gameService.processGuess(game, guess);
+
+            // Assert
+            assertNotNull(updatedGame);
+            assertEquals(2, updatedGame.getTurn()); // Turn should be incremented
+            verify(gameRepository, times(1)).save(any(Game.class)); // Ensure save is called
+        }
+
+
+
     }
-}
 

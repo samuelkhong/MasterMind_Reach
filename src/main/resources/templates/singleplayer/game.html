@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastermind Game</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+
+
+<h1>Mastermind Game</h1>
+
+<!-- Only show secret key if game is over (won or lost) -->
+<div th:if="${game.status != 'ongoing'}">
+    <h2>You <span th:text="${game.status}"></span></h2>
+    <div>Secret: <span th:text="${game.secretCode}"></span></div>
+</div>
+
+<table>
+    <tr th:each="row, rowIndex : ${game.board}">
+        <td th:each="cell : ${row}" th:text="${cell}"></td>
+        <td th:text="${game.feedback[rowIndex]}"></td>
+    </tr>
+</table>
+
+<!-- Only show form if game is ongoing -->
+<div th:if="${game.status == 'ongoing'}">
+    <form id="guessForm" th:action="@{/game/guess}" method="post">
+        <div th:each="i : ${#numbers.sequence(1, game.difficulty == 'medium' ? 6 : (game.difficulty == 'hard' ? 8 : 4))}">
+            <label th:for="'guess' + ${i}">Guess <span th:text="${i}"></span>:</label>
+            <input type="number" th:name="'guess' + ${i}" th:id="'guess' + ${i}" min="0" max="7" required>
+        </div>
+        <button type="submit">Submit Guess</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("guessForm");
+        const gameIdInput = document.createElement("input");
+        gameIdInput.type = "hidden";
+        gameIdInput.name = "gameId";
+
+        // Get gameId from URL
+        const gameId = window.location.pathname.split("/").pop(); // Get the last segment of the URL path
+
+        gameIdInput.value = gameId; // Set the value of the hidden input to the extracted game ID
+        form.appendChild(gameIdInput);
+    });
+</script>
+</body>
+</html>

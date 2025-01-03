@@ -4,12 +4,14 @@ package com.khong.samuel.Mastermind_Reach.feature.singleplayer.controller;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.service.GameService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
 
-@RestController
+@Controller
 @RequestMapping("/singleplayer")
 public class GameController {
 
@@ -24,15 +26,23 @@ public class GameController {
 
     // create new game
     @GetMapping ("/start")
-    public ResponseEntity<Void> startGame() {
-        Game newGame = gameService.startNewGame();
-
-        // Dynamically create new link using gameID
-        URI gameUri = URI.create("./game/" + newGame.getId());
-
-        // Return a 302 redirect with the Location header
-        return ResponseEntity.status(302).location(gameUri).build();
+    public String startGame() {
+        return "singleplayer/gameSelect";
     }
+
+    @PostMapping("/start")
+    public String startNewGame(@RequestParam String difficulty, Model model) {
+        // Create a new game object based on the selected difficulty
+        Game newGame = gameService.startNewGame(difficulty);
+
+        // Add the new game to the model so it can be accessed in the Thymeleaf template
+//        model.addAttribute("newGame", newGame);
+
+        // Return the name of the Thymeleaf template
+        return "hello world";
+    }
+
+
 
     // Get the current game by ID
     @GetMapping("/game/{id}")
