@@ -14,13 +14,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * The {@code GameController} class is responsible for handling requests related to a single-player game.
+ * It handles the logic for starting a new game, processing guesses, and displaying the current game state.
+ */
 @Controller
 @RequestMapping("/singleplayer")
 public class GameController {
 
     private final GameService gameService;
-
 
     public GameController(GameService gameService) {
         this.gameService = gameService;
