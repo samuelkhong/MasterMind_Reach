@@ -19,7 +19,16 @@ public class Game {
     private String secretCode; // The secret code to be guessed
     private boolean gameOver; // Indicates if the game is finished
 
-    private String[] board;
+    private String[][] board;
+
+    // Difficulty Enum
+    public enum Difficulty {
+        EASY, MEDIUM, HARD
+    }
+
+    @Builder.Default
+    private Difficulty difficulty = Difficulty.EASY; // Default difficulty is easy
+
     @Builder.Default
     private boolean won = false; // Indicates if the player has won
 
