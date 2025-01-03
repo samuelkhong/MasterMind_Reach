@@ -27,12 +27,31 @@ public class GameController {
     }
 
 
-    // create new game
+    /**
+     * Displays the game selection page for the user.
+     *
+     * This method handles the HTTP GET request for the "/start" endpoint. It simply returns the view name
+     * for the game selection page, allowing the user to choose a game difficulty before starting a new game.
+     *
+     * @return The name of the Thymeleaf template that renders the game selection page.
+     */
     @GetMapping ("/start")
     public String startGame() {
         return "singleplayer/gameSelect";
     }
 
+    /**
+     * Starts a new game based on the selected difficulty and redirects to the game page.
+     *
+     * This method initializes a new game by calling the service to create a game with the specified difficulty.
+     * After the game is created, the game object is added to the model and the user is redirected to the game page
+     * using the newly generated game ID. If any error occurs during the game creation, the user is redirected
+     * to an error page.
+     *
+     * @param difficulty The difficulty level selected by the user (e.g., "easy", "medium", "hard").
+     * @param model The {@link Model} object used to pass the game data to the view (if needed).
+     * @return A redirect to the game page with the newly created game's ID or an error page if something goes wrong.
+     */
     @PostMapping("/start")
     public String startNewGame(@RequestParam String difficulty, Model model) {
         try {
@@ -50,10 +69,19 @@ public class GameController {
         }
     }
 
+    /**
+     * Loads a game by its ID and prepares the model for rendering the game page.
+     *
+     * This method retrieves the game object based on the provided game ID. If the game is found, it adds the
+     * game object to the model for rendering in the Thymeleaf template. If the game cannot be found, it returns
+     * an error page. The method then returns the name of the Thymeleaf template to display the game details to the user.
+     *
+     * @param gameId The ID of the game to be loaded.
+     * @param model The {@link Model} object used to add the game data to the view for rendering.
+     * @return The name of the Thymeleaf template to display the game, or an error page if the game is not found.
+     */
     @GetMapping("/game/{gameId}")
     public String loadGame(@PathVariable String gameId, Model model) {
-//        System.out.println("Game ID from URL: " + gameId);
-
         // Retrieve the game object by its ID
         Game game = gameService.getGameById(gameId);
 
@@ -68,15 +96,24 @@ public class GameController {
         return "singleplayer/game";  // This is the Thymeleaf template to display the game
     }
 
+    /**
+     * Handles the submission of a player's guess in the game.
+     *
+     * This method processes the player's guess, validates and extracts the guess values from the request parameters,
+     * updates the game state, and redirects the player back to the game page. The maximum number of guesses allowed
+     * is determined by the game's difficulty level (easy, medium, or hard). The method then calls the game service
+     * to process the guess and updates the model with the game state to render the updated view.
+     *
+     * @param gameId The ID of the game being played.
+     * @param allParams A map containing all request parameters, including the guesses.
+     * @param model The {@link Model} object used to add attributes for rendering the view.
+     * @return A redirect URL to the game page with the updated game state.
+     */
     @PostMapping("/guess")
     public String handleGuess(@RequestParam("gameId") String gameId,
                               @RequestParam Map<String, String> allParams,
                               Model model) {
-        // test if we got gameID
-        System.out.println(gameId);
-        // print out guesses
-        System.out.println(allParams);
-        // Get the game object based on gameId
+
         Game game = gameService.getGameById(gameId);
 
         // Initialize the maxGuesses variable based on game difficulty
@@ -97,33 +134,27 @@ public class GameController {
                 maxGuesses = 4;
                 break;
         }
-
-        // List to store the guesses in order
+        // list to store the guesses in order. Important since order is necessary for check
         List<Integer> guesses = new ArrayList<>();
 
-        // Loop through each guess (from 1 to maxGuesses) and retrieve the corresponding value
+        // Get the values from each guess
         for (int i = 1; i <= maxGuesses; i++) {
             String guessStr = allParams.get("guess" + i); // Get the value for guess1.
 
             if (guessStr != null && !guessStr.isEmpty()) {
                 int guess = Integer.parseInt(guessStr);
-                guesses.add(guess);  // The list will maintain the order of guesses
+                guesses.add(guess);
             }
         }
 
         // Send guesses to be processed
         gameService.processGuess(gameId, guesses);
 
-        System.out.println(game);
-
         // Add the game data to the model for rendering the view
         model.addAttribute("game", game);
 
-        return "redirect:/singleplayer/game/" + gameId;  // Redirects to the /game/{gameId} URL
+        return "redirect:/singleplayer/game/" + gameId;  // after each submit, redirects back to game page
     }
-
-
-
 
 }
 
