@@ -53,7 +53,6 @@ public class GameController {
 
     @GetMapping("/game/{gameId}")
     public String loadGame(@PathVariable String gameId, Model model) {
-        // For debugging: check the gameId being passed
 //        System.out.println("Game ID from URL: " + gameId);
 
         // Retrieve the game object by its ID
@@ -84,19 +83,19 @@ public class GameController {
         // Initialize the maxGuesses variable based on game difficulty
         int maxGuesses = 0;
 
-        // Switch statement to set the number of guesses based on difficulty
+        // find the max guesses per difficulty
         switch (game.getDifficulty()) {
             case EASY:
-                maxGuesses = 4;  // 4 guesses for EASY
+                    maxGuesses = 4;
                 break;
             case MEDIUM:
-                maxGuesses = 6;  // 6 guesses for MEDIUM
+                maxGuesses = 6;
                 break;
             case HARD:
-                maxGuesses = 8;  // 8 guesses for HARD
+                maxGuesses = 8;
                 break;
             default:
-                maxGuesses = 4;  // Default to 4 guesses if difficulty is unknown
+                maxGuesses = 4;
                 break;
         }
 
@@ -113,10 +112,10 @@ public class GameController {
             }
         }
 
-        System.out.println(guesses);
-
         // Send guesses to be processed
         gameService.processGuess(gameId, guesses);
+
+        System.out.println(game);
 
         // Add the game data to the model for rendering the view
         model.addAttribute("game", game);

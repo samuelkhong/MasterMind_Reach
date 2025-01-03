@@ -67,13 +67,7 @@ public class GameService {
                 return game;
             }
 
-            // Check if the max turn count is exceeded
-            if (game.getTurn() >= 10) {
-                game.setWon(false);  // Set false for player loss
-                game.setGameOver(true);
-                gameRepository.save(game);
-                return game;
-            }
+
 
 
             // Validate the guess if it is integers
@@ -93,14 +87,24 @@ public class GameService {
             // Update the board with the guess
             updateBoard(guessArr, game);
 
+
+
             // Check if the guess resulted in a win
             if (checkWin(guessArr, game)) {
                 game.setWon(true);  // Set won to true
                 game.setGameOver(true);  // Set game over
-            } else {
-                // Increment the turn count
-                game.setTurn(game.getTurn() + 1);
             }
+            // Increment the turn count
+            game.setTurn(game.getTurn() + 1);
+
+            // Check if the max turn count is exceeded
+            if (game.getTurn() > 10) {
+                game.setWon(false);  // Set false for player loss
+                game.setGameOver(true);
+                gameRepository.save(game);
+                return game;
+            }
+
 
             // Save the updated game state
             gameRepository.save(game);
@@ -213,7 +217,7 @@ public class GameService {
         }
 
         // Add guess to the board at the appropriate turn position
-        if (turn < 10) {  // Ensure the turn is within the valid number of turns
+        if (turn <= 10) {  // Fixed bug that did not edit last number
             board[10 - turn] = guessArr;
         }
 

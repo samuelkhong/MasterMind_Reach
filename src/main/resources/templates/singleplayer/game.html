@@ -10,6 +10,7 @@
 
 <h1>Mastermind Game</h1>
 
+
 <!-- Display game over message and secret code if the game is over -->
 <div th:if="${game.gameOver}">
     <h2 th:text="'You ' + (${game.won} ? 'won' : 'lost')"></h2>
@@ -20,7 +21,12 @@
 <table>
     <tr th:each="row, rowIndex : ${game.board}">
         <td th:each="cell : ${row}" th:text="${cell}"></td>
+        <td th:text="${game.feedbacks[10 - rowIndex.index - 1]}"></td>
+
+
     </tr>
+
+
 </table>
 
 <!-- Show current turn if the game is not over -->
@@ -29,9 +35,9 @@
 
     <!-- Form to submit guess -->
     <form id="guessForm" th:action="@{/singleplayer/guess}" method="post">
-        <!-- Remove the static gameId hidden input here -->
 
-        <!-- Generate input fields based on game difficulty -->
+
+        <!-- Dyanmic generate the amount of inputs based of game difficulty -->
         <div th:each="i : ${#numbers.sequence(1, game.difficulty == 'MEDIUM' ? 6 : game.difficulty == 'HARD' ? 8 : 4)}">
             <label th:for="'guess' + ${i}">Guess <span th:text="${i}">1</span>:</label>
             <input type="number" th:name="'guess' + ${i}" th:id="'guess' + ${i}" min="0" max="7" required/>

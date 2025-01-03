@@ -43,7 +43,8 @@ public class Game {
     private List<String> guesses = new ArrayList<>(); // List of guesses as strings
 
     @Builder.Default
-    private String[] feedbacks = new String[10]; // Feedback strings for guesses
+    private String[] feedbacks = new String[10]; // Default array with 10 empty strings
+
 
     // Constructor fills feedback so not empty
 
