@@ -36,9 +36,10 @@
     <!-- Form to submit guess -->
     <form id="guessForm" th:action="@{/singleplayer/guess}" method="post">
 
-
-        <!-- Dyanmic generate the amount of inputs based of game difficulty -->
-        <div th:each="i : ${#numbers.sequence(1, game.difficulty == 'MEDIUM' ? 6 : game.difficulty == 'HARD' ? 8 : 4)}">
+<!--        Dynamic Gen amount of inputs based on difficulty-->
+        <div th:each="i : ${#numbers.sequence(1,
+            #strings.trim(game.difficulty) == 'EASY' ? 4 :
+            #strings.trim(game.difficulty) == 'MEDIUM' ? 6 : 8)}">
             <label th:for="'guess' + ${i}">Guess <span th:text="${i}">1</span>:</label>
             <input type="number" th:name="'guess' + ${i}" th:id="'guess' + ${i}" min="0" max="7" required/>
         </div>

@@ -27,7 +27,6 @@ public class GameController {
     }
 
 
-
     // create new game
     @GetMapping ("/start")
     public String startGame() {

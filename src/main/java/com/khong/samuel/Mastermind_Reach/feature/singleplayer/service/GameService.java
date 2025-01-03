@@ -231,15 +231,15 @@ public class GameService {
 
 
     private boolean isValidNumber(List<Integer> guesses) {
-        // Ensure the list of guesses is not empty
+        // empty null check
         if (guesses == null || guesses.isEmpty()) {
             return false;
         }
 
-        // Iterate through each guess in the list and validate
+        // iterate thorugh each guess
         for (Integer guess : guesses) {
-            // Ensure the guess is within the valid range (0-6)
-            if (guess < 0 || guess >= 7) {
+            // 0 - 8 valid
+            if (guess < 0 || guess >= 8) {
                 return false;
             }
         }
