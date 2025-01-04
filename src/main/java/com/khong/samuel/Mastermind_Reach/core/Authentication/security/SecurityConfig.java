@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .and()
                 .formLogin()  // Enable form-based login
                 .permitAll()  // Allow everyone to access the login page
+                .defaultSuccessUrl("/", true)  // Redirect to /home after successful login
                 .and()
                 .logout()  // Enable logout functionality
                 .logoutUrl("/logout")  // The default logout URL is "/logout"
