@@ -30,14 +30,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .requestMatchers ("/login", "/css/**", "/js/**").permitAll()  // Allow unauthenticated access to login page and static files
+                .requestMatchers ("/login", "/css/**", "/js/**", "/register").permitAll()  // Allow unauthenticated access to login page and static files
                 .anyRequest().authenticated()  // Require authentication for all other requests
                 .and()
                 .formLogin()  // Enable form-based login
                 .permitAll()  // Allow everyone to access the login page
                 .and()
                 .logout()  // Enable logout functionality
-                .logoutUrl("/logout")  // The default logout URL is "/logout", but you can customize it
+                .logoutUrl("/logout")  // The default logout URL is "/logout"
                 .logoutSuccessUrl("/login?logout")  // Redirect to login page after successful logout
                 .invalidateHttpSession(true)  // Invalidate the session to clear any user session data
                 .clearAuthentication(true)  // Clear authentication data
@@ -47,6 +47,21 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    //potentially add another security filter to prevent logged in users from registering
+
+//    @Bean
+//    public SecurityFilterChain redirectAuthenticatedToHome(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeRequests()
+//                .requestMatchers("/register")
+//                .authenticated()
+//                .and()
+//                .exceptionHandling()
+//                .accessDeniedPage("/");  // Redirect authenticated users to /home (or dashboard)
+//
+//        return http.build();
+//    }
 
 
 
