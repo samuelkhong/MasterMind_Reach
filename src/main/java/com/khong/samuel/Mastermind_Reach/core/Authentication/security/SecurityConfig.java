@@ -49,21 +49,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    //potentially add another security filter to prevent logged in users from registering
-
-//    @Bean
-//    public SecurityFilterChain redirectAuthenticatedToHome(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeRequests()
-//                .requestMatchers("/register")
-//                .authenticated()
-//                .and()
-//                .exceptionHandling()
-//                .accessDeniedPage("/");  // Redirect authenticated users to /home (or dashboard)
-//
-//        return http.build();
-//    }
-
 
 
     @Bean

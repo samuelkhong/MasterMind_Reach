@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <title>NavBar</title>
+</head>
+<body>
+
+<nav th:fragment="navbar">
+  <ul>
+    <!-- Always visible links -->
+    <li><a th:href="@{/}" >Home</a></li>
+
+    <!-- Show Login/Register links for non-authenticated users -->
+    <li sec:authorize="isAnonymous()">
+      <a th:href="@{/login}" >Login</a>
+    </li>
+    <li sec:authorize="isAnonymous()">
+      <a th:href="@{/register}" >Register</a>
+    </li>
+
+    <!-- Show Logout link for authenticated users -->
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/logout}" >Logout</a>
+    </li>
+  </ul>
+</nav>
+
+</body>
+</html>
