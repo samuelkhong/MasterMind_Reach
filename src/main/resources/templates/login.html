@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<!-- Include a navbar fragment -->
+<div th:replace="~{partials/navbar}"></div>
+
+<div class="container">
+  <h1>Login</h1>
+
+  <!-- Display errors if any -->
+  <div th:if="${#fields.hasErrors()}">
+    <div class="alert alert-danger" role="alert">
+      <ul>
+        <li th:each="error : ${#fields.errors()}" th:text="${error}"></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Login form -->
+  <form th:action="@{/authenticate/login}" method="post">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="text" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+</body>
+</html>
