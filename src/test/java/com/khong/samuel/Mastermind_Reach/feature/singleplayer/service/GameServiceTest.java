@@ -178,14 +178,14 @@ import static org.mockito.Mockito.*;
 
         gameService.getFeedback(guess, game.getSecretCode().chars().map(Character::getNumericValue).toArray(), feedback);  // Calculate feedback
 
-        // Assert
+
         assertEquals(4, feedback.getExactMatches());  // Verify 4 exact matches
         assertEquals(0, feedback.getPartialMatches());  // Verify 0 partial matches
     }
 
     @Test
     void testAllIncorrectGuesses() {
-        // Arrange
+
         Game game = gameService.startNewGame("EASY", "a");  // Use the startNewGame method for consistent setup
         game.setSecretCode("5678");  // Setting a mock secret code
         int[] guess = {1, 2, 3, 4};  // Exact match guess
@@ -194,7 +194,7 @@ import static org.mockito.Mockito.*;
 
         gameService.getFeedback(guess, game.getSecretCode().chars().map(Character::getNumericValue).toArray(), feedback);  // Calculate feedback
 
-        // Assert
+
         assertEquals(0, feedback.getExactMatches());  // Verify 4 exact matches
         assertEquals(0, feedback.getPartialMatches());  // Verify 0 partial matches
     }
@@ -210,20 +210,11 @@ import static org.mockito.Mockito.*;
 
         gameService.getFeedback(guess, game.getSecretCode().chars().map(Character::getNumericValue).toArray(), feedback);  // Calculate feedback
 
-        // Assert
+
         assertEquals(2, feedback.getExactMatches());  // 2 exact matches: 1 and 2
         assertEquals(0, feedback.getPartialMatches());  // 1 partial match: the second 1 (index 3) is a partial match
 
     }
-
-
-
-
-
-//
-
-
-
 
     }
 
