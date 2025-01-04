@@ -42,8 +42,17 @@ public class GameController {
     @GetMapping ("/start")
     public String startGame(@AuthenticationPrincipal CustomUserDetails customUserDetails, Model model) {
 
+
+        // get all games for the current user from the GameService
+        List<Game> games = gameService.getGamesByPlayerId(customUserDetails.getUserId());
+
+        // Add all games and userID to pass to template
+        model.addAttribute("games", games);
         // Add the userId to the model
         model.addAttribute("userId", customUserDetails.getUserId());
+
+
+
         return "singleplayer/gameSelect";
     }
 
@@ -79,6 +88,13 @@ public class GameController {
         }
     }
 
+    @PostMapping("/loadGame")
+    public String redirectGame(@RequestParam("gameId") String gameId, Model model) {
+        return "redirect:/singleplayer/game/" + gameId;
+
+    }
+
+
     /**
      * Loads a game by its ID and prepares the model for rendering the game page.
      *
@@ -90,6 +106,7 @@ public class GameController {
      * @param model The {@link Model} object used to add the game data to the view for rendering.
      * @return The name of the Thymeleaf template to display the game, or an error page if the game is not found.
      */
+
     @GetMapping("/game/{gameId}")
     public String loadGame(@PathVariable String gameId, Model model) {
         // Retrieve the game object by its ID

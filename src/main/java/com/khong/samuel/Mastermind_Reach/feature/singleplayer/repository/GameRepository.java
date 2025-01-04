@@ -4,6 +4,8 @@ import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Repository interface for accessing and managing {@link Game} entities in a MongoDB database.
  *
@@ -16,4 +18,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface GameRepository extends MongoRepository<Game, String> {
+
+    // Method to find all games by playerId
+    List<Game> findByPlayerId(String playerId);
+
 }

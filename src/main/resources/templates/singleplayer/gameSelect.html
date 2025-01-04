@@ -22,22 +22,25 @@
 </form>
 
 <!-- Load Game Form -->
-<form th:action="@{/game/loadGame}" method="post">
+<form th:action="@{/singleplayer/loadGame}" method="post">
   <input type="text" name="gameId" placeholder="Enter Game ID">
   <button type="submit">Load Game</button>
 </form>
 
-<!--<div> Previous Games-->
-<!--  <div th:if="${games != null and games.size() > 0}">-->
-<!--    <div th:each="game : ${games}">-->
-<!--      <div>-->
-<!--        <span th:text="${game._id}"></span>-->
-<!--        <span th:text="${game.status}"></span>-->
-<!--        <span th:text="${game.difficulty}"></span>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
+<div> Previous Games
+  <div th:if="${games != null and games.size() > 0}">
+    <div th:each="game : ${games}">
+      <div>
+        <span th:text="${game.id}">Game ID</span> <!-- Access game ID -->
+        <span th:text="${game.gameOver ? 'Complted' : 'Ongoing'}">Game Status</span> <!-- Access the game status (won or lost) -->
+        <span th:text="${game.difficulty}">Difficulty</span> <!-- Access difficulty level -->
+      </div>
+    </div>
+  </div>
+  <div th:if="${games == null or games.size() == 0}">
+    <p>No games played yet.</p> <!-- Message if no games are found -->
+  </div>
+</div>
 
 </body>
 </html>

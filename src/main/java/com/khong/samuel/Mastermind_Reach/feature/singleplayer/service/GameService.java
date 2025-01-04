@@ -491,6 +491,12 @@ public class GameService {
         return sb.toString();
     }
 
+    // Method to get all games for a specific playerId
+    public List<Game> getGamesByPlayerId(String playerId) {
+        return gameRepository.findByPlayerId(playerId);
+    }
+
+
 
 
 }
