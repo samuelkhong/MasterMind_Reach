@@ -95,7 +95,7 @@ import static org.mockito.Mockito.*;
             when(gameRepository.save(any(Game.class))).thenReturn(mockGame);
 
 
-            Game newGame = gameService.startNewGame(difficulty);
+            Game newGame = gameService.startNewGame(difficulty, "abc");
             System.out.println(newGame.getId());
             System.out.println(newGame.getSecretCode());
 
@@ -144,7 +144,7 @@ import static org.mockito.Mockito.*;
         @Test
         void testProcessGuess() {
             // Arrange
-            Game game = gameService.startNewGame("EASY");
+            Game game = gameService.startNewGame("EASY", "abc");
             List<Integer> guess = Arrays.asList(1, 2, 3, 4); // Mock guess as a List of integers
             when(gameRepository.save(any(Game.class))).thenReturn(game);
 
@@ -170,7 +170,7 @@ import static org.mockito.Mockito.*;
     @Test
     void testGetFeedback() {
         // Arrange
-        Game game = gameService.startNewGame("EASY");  // Use the startNewGame method for consistent setup
+        Game game = gameService.startNewGame("EASY", "a");  // Use the startNewGame method for consistent setup
         game.setSecretCode("1234");  // Setting a mock secret code
         int[] guess = {1, 2, 3, 4};  // Exact match guess
         Feedback feedback = new Feedback();  // Feedback object to store results
@@ -186,7 +186,7 @@ import static org.mockito.Mockito.*;
     @Test
     void testAllIncorrectGuesses() {
         // Arrange
-        Game game = gameService.startNewGame("EASY");  // Use the startNewGame method for consistent setup
+        Game game = gameService.startNewGame("EASY", "a");  // Use the startNewGame method for consistent setup
         game.setSecretCode("5678");  // Setting a mock secret code
         int[] guess = {1, 2, 3, 4};  // Exact match guess
         Feedback feedback = new Feedback();  // Feedback object to store results
@@ -202,7 +202,7 @@ import static org.mockito.Mockito.*;
     @Test
     void partialCorrectGuesses() {
         // Arrange
-        Game game = gameService.startNewGame("EASY");  // Use the startNewGame method for consistent setup
+        Game game = gameService.startNewGame("EASY" , "abc");  // Use the startNewGame method for consistent setup
         game.setSecretCode("1234");  // Setting a mock secret code
         int[] guess = {1, 2, 5, 1};  // Exact match guess
         Feedback feedback = new Feedback();  // Feedback object to store results

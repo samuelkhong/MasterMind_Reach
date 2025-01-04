@@ -40,6 +40,7 @@ public class Game {
 
     @Id
     private String id; // Unique identifier for the game
+    private String playerId;
     private String secretCode; // The secret code to be guessed
 
 

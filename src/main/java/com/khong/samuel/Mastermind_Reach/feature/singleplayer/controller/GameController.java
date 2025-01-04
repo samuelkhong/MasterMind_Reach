@@ -1,9 +1,11 @@
 package com.khong.samuel.Mastermind_Reach.feature.singleplayer.controller;
 
 
+import com.khong.samuel.Mastermind_Reach.core.Authentication.model.CustomUserDetails;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.model.Game;
 import com.khong.samuel.Mastermind_Reach.feature.singleplayer.service.GameService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +40,10 @@ public class GameController {
      * @return The name of the Thymeleaf template that renders the game selection page.
      */
     @GetMapping ("/start")
-    public String startGame() {
+    public String startGame(@AuthenticationPrincipal CustomUserDetails customUserDetails, Model model) {
+
+        // Add the userId to the model
+        model.addAttribute("userId", customUserDetails.getUserId());
         return "singleplayer/gameSelect";
     }
 
@@ -55,10 +60,13 @@ public class GameController {
      * @return A redirect to the game page with the newly created game's ID or an error page if something goes wrong.
      */
     @PostMapping("/start")
-    public String startNewGame(@RequestParam String difficulty, Model model) {
+    public String startNewGame(@RequestParam String difficulty, @AuthenticationPrincipal CustomUserDetails customUserDetails, Model model) {
         try {
+            // get the userId
+            String userId = customUserDetails.getUserId();
+            System.out.println(userId);
             // Create a new game based on the selected difficulty
-            Game newGame = gameService.startNewGame(difficulty);
+            Game newGame = gameService.startNewGame(difficulty, userId);
 
             // Add the new game to the model (if you need to use it for something else)
             model.addAttribute("game", newGame);

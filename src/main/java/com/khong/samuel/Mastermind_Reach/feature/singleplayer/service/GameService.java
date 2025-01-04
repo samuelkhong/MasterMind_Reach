@@ -47,7 +47,7 @@ public class GameService {
      * @throws IllegalArgumentException if an invalid difficulty level is provided.
      */
     @Transactional
-    public Game startNewGame(String difficulty) {
+    public Game startNewGame(String difficulty, String playerId) {
         // Set intial difficulty
         Game.Difficulty gameDifficulty = Game.Difficulty.valueOf(difficulty.toUpperCase());
 
@@ -59,6 +59,7 @@ public class GameService {
         // Generate a new game with difficulty and persist it in DB
         Game newGame = Game.builder()
                 .secretCode(generateSecretCode(difficulty)) // Generate secret code based on difficulty
+                .playerId(playerId)
                 .difficulty(gameDifficulty) // Set the difficulty
                 .board(board) // Initialize the board
                 .gameOver(false) // Game is not over initially
